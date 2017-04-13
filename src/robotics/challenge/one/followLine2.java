@@ -9,12 +9,12 @@ import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.robotics.SampleProvider;
 import lejos.robotics.subsumption.Behavior;
 
-public class followLine implements Behavior{
+public class followLine2 implements Behavior{
 	boolean suppressed = false;
 	EV3ColorSensor color;
-	double threshold = 0.20;
+	double threshold = 0.15;
 	
-	public followLine(Port port)
+	public followLine2(Port port)
 	{
 		color = new EV3ColorSensor(port);
 	}
@@ -25,6 +25,7 @@ public class followLine implements Behavior{
 		SampleProvider sampleprovider = color.getRedMode();
 		float[] sample = new float[1];
 		sampleprovider.fetchSample(sample, 0);
+		color.close();
 		return sample[0] > threshold;
 	}
 	
@@ -38,51 +39,13 @@ public class followLine implements Behavior{
 	public void action() {
 		suppressed = false;
 		
-		SampleProvider sampleprovider = color.getRedMode();
-		float[] sample = new float[1];
-
-		int CONSTANT = 240;
-		int CONSTANT_TWO = 0;
+		Motor.C.setSpeed(240);
+		Motor.C.forward();
 		
-		while (!suppressed) {
-
-			
-			//-0.000208333x A
-			//0.000208333x
-			sampleprovider.fetchSample(sample, 0);
-			if (sample[0] > 0.20) {
-				Motor.A.setSpeed(CONSTANT_TWO);
-				Motor.C.setSpeed(CONSTANT);
-
-				Motor.A.forward();
-				Motor.C.forward();
-			}
-
-			else if (sample[0] < 0.15) {
-				Motor.C.setSpeed(CONSTANT_TWO);
-				Motor.A.setSpeed(CONSTANT);
-
-				Motor.A.forward();
-				Motor.C.forward();
-			} 
-			
-			else {
-				Motor.C.setSpeed(CONSTANT);
-				Motor.A.setSpeed(CONSTANT);
-
-				Motor.A.forward();
-				Motor.C.forward();
-			} 
-			
-			
-			//	suppress();
+		while(!suppressed)
 			Thread.yield();
-		}
 		
-		Motor.A.stop(true);
-		Motor.C.stop(true);
-
-		
+		Motor.C.stop();
 		//EV3 ev3 = (EV3) BrickFinder.getDefault();
 		//Audio audio = ev3.getAudio();
 		//audio.systemSound(0);

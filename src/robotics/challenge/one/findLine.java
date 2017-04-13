@@ -11,7 +11,7 @@ public class findLine implements Behavior {
 	@Override
 	public boolean takeControl() {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 	
 	@Override
@@ -25,14 +25,18 @@ public class findLine implements Behavior {
 	public void action() {
 		suppressed = false;
 		
+		Motor.A.setSpeed(360);
+		Motor.C.setSpeed(360);
+
+		
 		Motor.A.forward();
 		Motor.C.forward();
 		
 		while(!suppressed)
 			Thread.yield();
 		
-		Motor.A.stop();
-		Motor.B.stop();
+		Motor.A.stop(true);
+		Motor.C.stop(true);
 		
 	}
 
