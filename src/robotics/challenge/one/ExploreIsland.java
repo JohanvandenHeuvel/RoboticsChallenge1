@@ -11,7 +11,6 @@ public class ExploreIsland {
 	public static void main(String[] args) {
 		Behavior findLine = new findLine();
 		Behavior followLine = new followLine(SensorPort.S1);
-		
 		Behavior corner = new Behavior() {
 			
 			@Override

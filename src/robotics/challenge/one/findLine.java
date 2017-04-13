@@ -1,5 +1,6 @@
 package robotics.challenge.one;
 
+import lejos.hardware.motor.Motor;
 import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.robotics.subsumption.Behavior;
@@ -22,7 +23,16 @@ public class findLine implements Behavior {
 	
 	@Override
 	public void action() {
-		//Drive around randomly
+		suppressed = false;
+		
+		Motor.A.forward();
+		Motor.C.forward();
+		
+		while(!suppressed)
+			Thread.yield();
+		
+		Motor.A.stop();
+		Motor.B.stop();
 		
 	}
 
