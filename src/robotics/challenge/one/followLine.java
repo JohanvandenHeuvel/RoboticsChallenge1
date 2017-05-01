@@ -45,28 +45,30 @@ public class followLine implements Behavior{
 		int CONSTANT_TWO = 0;
 		
 		while (!suppressed) {
-
-			
-			//-0.000208333x A
-			//0.000208333x
 			sampleprovider.fetchSample(sample, 0);
 			if (sample[0] > 0.20) {
-				Motor.A.setSpeed(CONSTANT_TWO);
-				Motor.C.setSpeed(CONSTANT);
+				//Motor.A.setSpeed(smoothSpeed('A', sample[0], 300, 400));
+				//Motor.C.setSpeed(smoothSpeed('C', sample[0], 300, 400));
+				Motor.A.setSpeed(CONSTANT);
+				Motor.C.setSpeed(CONSTANT_TWO);
 
 				Motor.A.forward();
 				Motor.C.forward();
 			}
 
 			else if (sample[0] < 0.15) {
-				Motor.C.setSpeed(CONSTANT_TWO);
-				Motor.A.setSpeed(CONSTANT);
+				//Motor.A.setSpeed(smoothSpeed('A', sample[0], 300, 400));
+				//Motor.C.setSpeed(smoothSpeed('C', sample[0], 300, 400));
+				Motor.C.setSpeed(CONSTANT);
+				Motor.A.setSpeed(CONSTANT_TWO);
 
 				Motor.A.forward();
 				Motor.C.forward();
 			} 
 			
 			else {
+				//Motor.A.setSpeed(smoothSpeed('A', sample[0], 300, 400));
+				//Motor.C.setSpeed(smoothSpeed('C', sample[0], 300, 400));
 				Motor.C.setSpeed(CONSTANT);
 				Motor.A.setSpeed(CONSTANT);
 
@@ -87,5 +89,18 @@ public class followLine implements Behavior{
 		//Audio audio = ev3.getAudio();
 		//audio.systemSound(0);
 		
+	}
+	
+	public static int smoothSpeed(char motorName, float colorValue, float minimumSpeed, float normalSpeed) {
+
+		 switch (motorName) {
+		 case 'A':
+		  return (int) ((normalSpeed - minimumSpeed)*colorValue / 0.35 + (normalSpeed - minimumSpeed) / 1.4);
+		 case 'C':
+		  return (int) ((normalSpeed - minimumSpeed)*(0.5 - colorValue) / 0.35 + (normalSpeed - minimumSpeed) / 1.4);
+		 default:
+		  break;
+		}
+		return -1;
 	}
 }
