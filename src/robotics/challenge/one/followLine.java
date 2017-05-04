@@ -42,12 +42,41 @@ public class followLine implements Behavior{
 		SampleProvider sampleprovider = color.getRedMode();
 		float[] sample = new float[1];
 
-		int CONSTANT = 240;
-		int CONSTANT_ZERO = 0;
+		//int CONSTANT = 240;
+		//int CONSTANT_ZERO = 0;
+		double speed = 300;
+		double threshold1 = 0.20;
+		double threshold2 = 0.15;
+		double avg_threshold = (threshold1+threshold2)/2;
+		
+		double Kp = 1000; 
+		double Ki = 0;
+		double Kd = 0;
+		
+		double last_error = 0;
+		double intergral = 0;
+		
 		
 		while (!suppressed) {
-			sampleprovider.fetchSample(sample, 0);
-			if (sample[0] > 0.20) {
+			sampleprovider.fetchSample(sample, 0); //get sensor value
+			
+			//0.025 * 500 = 12.5
+			
+			double error = avg_threshold - sample[0];
+			intergral = error + intergral;
+			double derivative = error - last_error;
+			double correction = Kp * error + Ki * intergral + Kd * derivative;
+			
+			last_error = error;
+			
+			Motor.A.setSpeed((int) (speed - correction));
+			Motor.C.setSpeed((int) (speed + correction));
+			
+			Motor.A.forward();
+			Motor.C.forward();
+			
+			/*
+			if (sample[0] > threshold1) {
 				Motor.A.setSpeed(CONSTANT);
 				Motor.C.setSpeed(CONSTANT_ZERO);
 
@@ -55,7 +84,7 @@ public class followLine implements Behavior{
 				Motor.C.forward();
 			}
 
-			else if (sample[0] < 0.15) {
+			else if (sample[0] < threshold2) {
 				Motor.C.setSpeed(CONSTANT);
 				Motor.A.setSpeed(CONSTANT_ZERO);
 
@@ -70,7 +99,7 @@ public class followLine implements Behavior{
 				Motor.A.forward();
 				Motor.C.forward();
 			} 
-			
+			*/
 			
 			//	suppress();
 			Thread.yield();
