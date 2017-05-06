@@ -44,14 +44,21 @@ public class followLine implements Behavior{
 
 		//int CONSTANT = 240;
 		//int CONSTANT_ZERO = 0;
-		double speed = 300;
-		double threshold1 = 0.20;
-		double threshold2 = 0.15;
-		double avg_threshold = (threshold1+threshold2)/2;
+		double speed = 200;
+		double white = 0.35;
+		double black = 0.1;
+		double avg_threshold = ( white - black ) / 2 + black;
+		
+		//0.35-0.10 = 0.25
+		//0.125+0.1 = 0.225
+		//0.225-0.10= 0.125
+		
+		//100*0.125 = 12.5
+		//200 = 25
 		
 		double Kp = 1000; 
 		double Ki = 0;
-		double Kd = 0;
+		double Kd = 0;//10000; 
 		
 		double last_error = 0;
 		double intergral = 0;
@@ -59,8 +66,6 @@ public class followLine implements Behavior{
 		
 		while (!suppressed) {
 			sampleprovider.fetchSample(sample, 0); //get sensor value
-			
-			//0.025 * 500 = 12.5
 			
 			double error = avg_threshold - sample[0];
 			intergral = error + intergral;
