@@ -111,11 +111,11 @@ public class FollowLine implements Behavior{
 			double upperBound = 1.6 * avgThreshold;
 			
 			if (sampleColor < lowerBound)
-				//Turn ... if on ...
-				Motor.C.backward();
-			else if (sampleColor >= upperBound)
-				//Turn ... if on ...
+				//Turn left if on right side of tape
 				Motor.A.backward();
+			else if (sampleColor >= upperBound)
+				//Turn right if on left side of tape
+				Motor.C.backward();
 			
 			Thread.yield();
 		}

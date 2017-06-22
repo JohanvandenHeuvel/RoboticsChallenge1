@@ -24,14 +24,14 @@ public class Challenge1 {
 		System.out.println("Sensors loaded..");
 		
 		//Behaviors
-		Behavior FindLine = new FindLine();
-		Behavior FollowLine = new FollowLine(color);
-		Behavior FollowLineInside = new FollowLineInside(color, gyro);
+//		Behavior FindLine = new FindLine();
+//		Behavior FollowLine = new FollowLine(color);
+//		Behavior FollowLineInside = new FollowLineInside(color, gyro);
 		Behavior FindPillar = new FindPillar(color, sonic);
 		System.out.println("Behaviors loaded..");
 		
 		//Arbitrator
-		Behavior [] bArray = {FindLine, FollowLine};
+		Behavior [] bArray = {FindPillar};
 		Arbitrator arbitrator = new Arbitrator(bArray);
 		arbitrator.start();
 	}

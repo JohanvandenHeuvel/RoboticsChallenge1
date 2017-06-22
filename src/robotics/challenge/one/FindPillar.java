@@ -1,7 +1,10 @@
 package robotics.challenge.one;
 
+import java.io.File;
+
 import lejos.hardware.Audio;
 import lejos.hardware.BrickFinder;
+import lejos.hardware.Sound;
 import lejos.hardware.ev3.EV3;
 import lejos.hardware.motor.Motor;
 import lejos.hardware.sensor.EV3ColorSensor;
@@ -68,9 +71,12 @@ public class FindPillar implements Behavior{
 	
 	public void playSound()
 	{
-		EV3 ev3 = (EV3) BrickFinder.getDefault();
-		Audio audio = ev3.getAudio();
-		audio.systemSound(0);
+//		EV3 ev3 = (EV3) BrickFinder.getDefault();
+//		Audio audio = ev3.getAudio();
+//		audio.systemSound(0);
+		File file = new File("sound.wav");
+		System.out.println(file.exists());
+		System.out.println(Sound.playSample(file, 100));
 	}
 	
 	public void inRange()
@@ -98,25 +104,37 @@ public class FindPillar implements Behavior{
 		Motor.C.forward();
 	}
 	
+	public void motorsSpeed(int speedA, int speedC)
+	{
+		Motor.A.setSpeed(speedA);
+		Motor.C.setSpeed(speedC);
+	}
+	
 	@Override
 	public void action() {
 		unsuppress();
 		
+		System.out.println("Playing sound..");
+		playSound();
+		System.out.println("Done");
+		
 		while (!suppressed) {
-			float sampleUltaSonic = readUltraSonic();
+			float sampleUltraSonic = readUltraSonic();
 			
-			if(sampleUltaSonic < THRESHOLD)
+			if(sampleUltraSonic < THRESHOLD)
 			{
 				inRange();
 			}
 			else
 			{
-				int speedMotorA = (sampleUltaSonic > 100) ? 0 : SPEED;
+				/**
+				 * Turn if no object in range
+				 * Forward if object in range
+				 */
+				int speedMotorA = (sampleUltraSonic > 100) ? 0 : SPEED;
 				int speedMotorC = SPEED;
-						
-				Motor.A.setSpeed(speedMotorA);
-				Motor.C.setSpeed(speedMotorC);
-
+				
+				motorsSpeed(speedMotorA, speedMotorC);
 				motorsForward();
 			
 				Thread.yield();
