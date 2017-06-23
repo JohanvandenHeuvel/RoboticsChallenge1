@@ -80,13 +80,13 @@ public class FollowLine implements Behavior{
 
 		//Color values
 		double white = 0.3;		//change
-		double black = 0.05;		//change
+		double black = 0.05;	//change
 		double avgThreshold = avgThreshold(white, black);
 		
 		//PID-controller values
 		double Kp = 1000; 		//change
 		double Ki = 0;			//change
-		double Kd = 0;		//change
+		double Kd = 0;			//change
 		
 		//PID-controller variables
 		double lastError = 0;
@@ -111,7 +111,7 @@ public class FollowLine implements Behavior{
 			double upperBound = 1.6 * avgThreshold;
 			
 			if (sampleColor < lowerBound)
-				//Turn left if on right side of tape
+				//Turn left if on middle of tape
 				Motor.A.backward();
 			else if (sampleColor >= upperBound)
 				//Turn right if on left side of tape

@@ -17,6 +17,7 @@ import lejos.robotics.subsumption.Behavior;
  */
 public class FollowLineInside implements Behavior {
 	boolean suppressed = false;
+	
 	EV3GyroSensor gyro;
 	EV3ColorSensor color;
 	
@@ -130,10 +131,10 @@ public class FollowLineInside implements Behavior {
 			double upperBound = 1.6 * avgThreshold;
 			
 			if (sampleColor < lowerBound)
-				//Turn ... if on ...
+				//Turn right if on middle of tape
 				Motor.C.backward();
 			else if (sampleColor >= upperBound)
-				//Turn ... if on ...
+				//Turn left if on right side of tape
 				Motor.A.backward();
 			
 			Thread.yield();

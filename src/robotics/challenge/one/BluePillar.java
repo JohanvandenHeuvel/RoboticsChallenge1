@@ -11,15 +11,14 @@ import lejos.robotics.SampleProvider;
 import lejos.robotics.subsumption.Behavior;
 
 /**
- * Behavior that finds a pillar.
+ * Behavior that does an action when close to a blue pillar.
  * @author johan
  *
  */
-public class FindPillar implements Behavior{
+public class BluePillar implements Behavior{
 	boolean suppressed;
 	boolean inRange = false;
 	
-	EV3GyroSensor gyro;
 	EV3UltrasonicSensor sonic;
 	EV3ColorSensor color;
 	
@@ -28,19 +27,21 @@ public class FindPillar implements Behavior{
 	final int RED = 5;
 	final int BLUE = 2;
 	
-	public FindPillar(EV3GyroSensor gyro, EV3ColorSensor color, EV3UltrasonicSensor sonic) 
+	public BluePillar(EV3ColorSensor color, EV3UltrasonicSensor sonic) 
 	{
 		suppressed = false;
 		this.sonic = sonic;
 		this.color = color;
-		this.gyro = gyro;
 	}
 	
 	@Override
+	/**
+	 * Take control if pillar very close and color is blue
+	 */
 	public boolean takeControl() 
 	{
-		float sampleGyro = readGyroAngle();
-		return Math.abs(sampleGyro) > 450 ;
+		inRange = readUltraSonic() < THRESHOLD;
+		return inRange && readColorIDMode() == BLUE;
 	}
 	
 	@Override
@@ -53,14 +54,6 @@ public class FindPillar implements Behavior{
 	{
 		suppressed = false;
 	}
-	
-	public float readGyroAngle()
-	{
-		float[] sample = new float[1];
-		SampleProvider sampleprovider = gyro.getAngleMode();
-		sampleprovider.fetchSample(sample, 0);
-		return sample[0];
-	} 
 	
 	public float readUltraSonic()
 	{
@@ -88,19 +81,6 @@ public class FindPillar implements Behavior{
 //		System.out.println(Sound.playSample(file, 100));
 	}
 	
-	public void inRange()
-	{
-		inRange = true;
-		suppress();
-		playSound();
-		
-		float sampleColor = readColorIDMode();
-		if (sampleColor == RED)
-			System.out.println("RED");
-		if (sampleColor == BLUE)
-			System.out.println("BLUE");
-	}
-	
 	public void motorsStop()
 	{
 		Motor.A.stop(true);
@@ -122,34 +102,7 @@ public class FindPillar implements Behavior{
 	@Override
 	public void action() {
 		unsuppress();
-		
-		System.out.println("Playing sound..");
 		playSound();
-		System.out.println("Done");
-		
-		while (!suppressed) {
-			float sampleUltraSonic = readUltraSonic();
-			
-			if(sampleUltraSonic < THRESHOLD)
-			{
-				inRange();
-			}
-			else
-			{
-				/**
-				 * Turn if no object in range
-				 * Forward if object in range
-				 */
-				int speedMotorA = (sampleUltraSonic > 100) ? 0 : SPEED;
-				int speedMotorC = SPEED;
-				
-				motorsSpeed(speedMotorA, speedMotorC);
-				motorsForward();
-			
-				Thread.yield();
-			}
-		}
-		
-		motorsStop();
+		System.out.println("BLUE");
 	}
 }
