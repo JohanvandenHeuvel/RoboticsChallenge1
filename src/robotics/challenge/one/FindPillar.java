@@ -24,7 +24,7 @@ public class FindPillar implements Behavior{
 	EV3ColorSensor color;
 	
 	final double THRESHOLD = 0.08;
-	final int SPEED = 200;
+	final int SPEED = 75;
 	final int RED = 5;
 	final int BLUE = 2;
 	
@@ -123,12 +123,18 @@ public class FindPillar implements Behavior{
 	public void action() {
 		unsuppress();
 		
-		System.out.println("Playing sound..");
-		playSound();
-		System.out.println("Done");
+		System.out.println("FindPillar");
+		
+//		System.out.println("Playing sound..");
+//		playSound();
+//		System.out.println("Done");
 		
 		while (!suppressed) {
+//			playSound();
+			
 			float sampleUltraSonic = readUltraSonic();
+			
+			System.out.println(readColorIDMode());
 			
 			if(sampleUltraSonic < THRESHOLD)
 			{
@@ -140,16 +146,21 @@ public class FindPillar implements Behavior{
 				 * Turn if no object in range
 				 * Forward if object in range
 				 */
-				int speedMotorA = (sampleUltraSonic > 100) ? 0 : SPEED;
-				int speedMotorC = SPEED;
+				if (sampleUltraSonic > 1)
+				{
+					motorsSpeed(SPEED, SPEED);
+					Motor.A.backward();
+					Motor.C.forward();
+				}
+				else 
+				{
+					motorsSpeed(2*SPEED, 2*SPEED);
+					motorsForward();
+				}
 				
-				motorsSpeed(speedMotorA, speedMotorC);
-				motorsForward();
-			
-				Thread.yield();
+//				Thread.yield();
 			}
 		}
-		
 		motorsStop();
 	}
 }

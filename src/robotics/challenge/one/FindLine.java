@@ -59,11 +59,12 @@ public class FindLine implements Behavior {
 	public void action() {
 		unsuppress();
 		
+		motorsSpeed(SPEED, SPEED);
+		
 		while(!suppressed)
 		{
-			motorsSpeed(SPEED, SPEED);
 			motorsForward();
-			Thread.yield();
+//			Thread.yield();
 		}
 			
 		motorsStop();

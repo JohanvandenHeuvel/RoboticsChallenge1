@@ -15,7 +15,7 @@ import lejos.robotics.subsumption.Behavior;
  * @author johan
  *
  */
-public class BluePillar implements Behavior{
+public class RedPillar implements Behavior{
 	boolean suppressed;
 	boolean inRange = false;
 	
@@ -27,7 +27,7 @@ public class BluePillar implements Behavior{
 	final int RED = 0;
 	final int BLUE = 2;
 	
-	public BluePillar(EV3ColorSensor color, EV3UltrasonicSensor sonic) 
+	public RedPillar(EV3ColorSensor color, EV3UltrasonicSensor sonic) 
 	{
 		suppressed = false;
 		this.sonic = sonic;
@@ -41,7 +41,7 @@ public class BluePillar implements Behavior{
 	public boolean takeControl() 
 	{
 		inRange = readUltraSonic() < THRESHOLD;
-		return inRange && readColorIDMode() == BLUE;
+		return inRange && readColorIDMode() == RED;
 	}
 	
 	@Override
@@ -104,6 +104,6 @@ public class BluePillar implements Behavior{
 		unsuppress();
 		motorsStop();
 		playSound();
-		System.out.println("BLUE");
+		System.out.println("RED");
 	}
 }

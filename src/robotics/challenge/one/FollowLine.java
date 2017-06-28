@@ -2,6 +2,7 @@ package robotics.challenge.one;
 
 import lejos.hardware.motor.Motor;
 import lejos.hardware.sensor.EV3ColorSensor;
+import lejos.hardware.sensor.EV3GyroSensor;
 import lejos.robotics.SampleProvider;
 import lejos.robotics.subsumption.Behavior;
 
@@ -13,15 +14,17 @@ import lejos.robotics.subsumption.Behavior;
 public class FollowLine implements Behavior{
 	boolean suppressed;
 	
+	EV3GyroSensor gyro;
 	EV3ColorSensor color;
 	
 	final double THRESHOLD = 0.15;
-	final int SPEED = 200;
+	final int SPEED = 300;
 	
-	public FollowLine(EV3ColorSensor color)
+	public FollowLine(EV3ColorSensor color, EV3GyroSensor gyro)
 	{
 		suppressed = false;
 		this.color = color;
+		this.gyro = gyro;
 	}
 	
 	@Override
@@ -49,6 +52,14 @@ public class FollowLine implements Behavior{
 		sampleProvider.fetchSample(sample, 0);
 		return sample[0];
 	}
+	
+	public float readGyroAngle()
+	{
+		float[] sample = new float[1];
+		SampleProvider sampleprovider = gyro.getAngleMode();
+		sampleprovider.fetchSample(sample, 0);
+		return sample[0];
+	} 
 	
 	public double avgThreshold(double white, double black)
 	{
@@ -92,8 +103,13 @@ public class FollowLine implements Behavior{
 		double lastError = 0;
 		double intergral = 0;
 		
+		//############
+		
+		//############
+		
 		while (!suppressed) {
 			float sampleColor = readColorRedMode();
+			System.out.println(readGyroAngle());
 			
 			//PID-controller calculations
 			double newError = avgThreshold - sampleColor;
@@ -103,21 +119,31 @@ public class FollowLine implements Behavior{
 			lastError = newError;
 			
 			//Normal PID-controller behavior
-			motorsSpeed(SPEED - correction, SPEED + correction);
-			motorsForward();
+			motorsSpeed(SPEED + correction, SPEED - correction);
 			
-			//Turn faster if outside Bounds
+//			//Turn faster if outside Bounds
 			double lowerBound = 0.3 * avgThreshold;
 			double upperBound = 1.6 * avgThreshold;
-			
+//			
 			if (sampleColor < lowerBound)
+			{
 				//Turn left if on middle of tape
-				Motor.A.backward();
-			else if (sampleColor >= upperBound)
-				//Turn right if on left side of tape
 				Motor.C.backward();
+				Motor.A.forward();
+			}
+			else if (sampleColor >= upperBound)
+			{
+				//Turn right if on left side of tape
+				Motor.A.backward();
+				Motor.C.forward();
+			}
+			else
+			{
+				motorsForward();
+			}
+				
 			
-			Thread.yield();
+//			Thread.yield();
 		}
 		
 		motorsStop();

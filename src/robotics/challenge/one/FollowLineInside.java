@@ -21,7 +21,7 @@ public class FollowLineInside implements Behavior {
 	EV3GyroSensor gyro;
 	EV3ColorSensor color;
 	
-	final int SPEED = 200;
+	final int SPEED = 300;
 	
 	public FollowLineInside(EV3ColorSensor color, EV3GyroSensor gyro)
 	{
@@ -33,7 +33,7 @@ public class FollowLineInside implements Behavior {
 	public boolean takeControl() 
 	{
 		float sampleGyro = readGyroAngle();
-		return Math.abs(sampleGyro) > 270 ;
+		return Math.abs(sampleGyro) >= 270 ;
 	}
 	
 	@Override
@@ -97,6 +97,8 @@ public class FollowLineInside implements Behavior {
 	public void action() 
 	{
 		unsuppress();
+		
+		playSound();
 
 		//Color values
 		double white = 0.3;		//change
@@ -123,21 +125,31 @@ public class FollowLineInside implements Behavior {
 			lastError = newError;
 			
 			//Normal PID-controller behavior
-			motorsSpeed(SPEED - correction, SPEED + correction);
+			motorsSpeed(SPEED + correction, SPEED - correction);
+			
+//			//Turn faster if outside Bounds
+			double lowerBound = 0.3 * avgThreshold;
+			double upperBound = 1.4 * avgThreshold;
+//			
+			
 			motorsForward();
 			
-			//Turn faster if outside Bounds
-			double lowerBound = 0.3 * avgThreshold;
-			double upperBound = 1.6 * avgThreshold;
-			
 			if (sampleColor < lowerBound)
-				//Turn right if on middle of tape
+			{
+				//Turn left if on middle of tape
 				Motor.C.backward();
+				Motor.A.forward();
+			}
 			else if (sampleColor >= upperBound)
-				//Turn left if on right side of tape
+			{
+				//Turn right if on left side of tape
 				Motor.A.backward();
-			
-			Thread.yield();
+				Motor.C.forward();
+			}
+			else
+			{
+				motorsForward();
+			}
 		}
 		
 		motorsStop();
