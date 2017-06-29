@@ -21,7 +21,7 @@ public class FollowLineInside implements Behavior {
 	EV3GyroSensor gyro;
 	EV3ColorSensor color;
 	
-	final int SPEED = 250;
+	final int SPEED = 150;
 	double white = 0.3;		//change
 	double black = 0.05;	//change
 	
@@ -34,9 +34,9 @@ public class FollowLineInside implements Behavior {
 	@Override
 	public boolean takeControl() 
 	{
-//		return true;
-		float sampleGyro = readGyroAngle();
-		return Math.abs(sampleGyro) >= 270 ;
+		return true;
+//		float sampleGyro = readGyroAngle();
+//		return Math.abs(sampleGyro) >= 270 ;
 	}
 	
 	@Override
@@ -91,17 +91,18 @@ public class FollowLineInside implements Behavior {
 		Motor.C.setSpeed(speedC);
 	}
 	
-	public void turnInside()
+	public void turnRight()
 	{
-		motorsSpeed((int) 0.5* SPEED,(int) 0.5 * SPEED);
+		motorsSpeed(SPEED,SPEED);
 		Motor.C.backward();
 		Motor.A.forward();
 		try {
-			Thread.sleep (1000);
+			Thread.sleep (1500);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		motorsStop();
 	}
 	
 	public double avgThreshold(double white, double black)
@@ -113,66 +114,64 @@ public class FollowLineInside implements Behavior {
 	public void action() 
 	{
 		unsuppress();
-		playSound();
-		turnInside();
-		playSound();
+		
+		turnRight();
+		System.out.println("Continue..");
 
 		//Color values
+		double white = 0.3;		//change
+		double black = 0.05;	//change
 		double avgThreshold = avgThreshold(white, black);
+		double lastSample = readColorRedMode();
 		
 		//PID-controller values
 		double Kp = 1000; 		//change
-		double Ki = 0;			//change
-		double Kd = 0;			//change
+		double Kd = 0;
 		
 		//PID-controller variables
 		double lastError = 0;
-		double intergral = 0;
-		float lastSample = readColorRedMode();
 		
 		while (!suppressed) {
-			float sample = readColorRedMode();
-			float sampleColor = (float) (0.5 * lastSample + 0.5 * sample);
-			lastSample = sampleColor;
+			float newSample = readColorRedMode();
+			float avgSample = (float) ((newSample + lastSample) / 2);
+			lastSample = newSample;
 			
 			//PID-controller calculations
-			double newError = avgThreshold - sampleColor;
-			intergral = newError + intergral;
+			double newError = avgThreshold - avgSample;
 			double derivative = newError - lastError;
-			int correction = (int) (Kp * newError + Ki * intergral + Kd * derivative);
 			lastError = newError;
 			
 			//Normal PID-controller behavior
-			
+			int correction = (int) (Kp * newError + Kd * derivative);
+
 			
 //			//Turn faster if outside Bounds
 			double lowerBound = 0.10; //0.35 * avgThreshold;
-			double upperBound = 0.25; //1.35 * avgThreshold;
-//			
+			double upperBound = 0.20; //1.35 * avgThreshold;
 			
-			motorsForward();
+//			motorsSpeed(SPEED + correction, SPEED - correction);
+//			motorsForward();
 			
-			if (sampleColor < lowerBound)
+			if (avgSample >= upperBound)
 			{
-				//Turn left if on middle of tape
-				motorsSpeed(SPEED - correction, SPEED + correction);
-				Motor.A.backward();
-				Motor.C.forward();
-			}
-			else if (sampleColor >= upperBound)
-			{
-				//Turn right if on left side of tape
-				motorsSpeed(SPEED + correction, SPEED - correction);
+				//Turn right if on middle of tape
+				motorsSpeed(SPEED, SPEED);
+				Motor.A.stop();
 				Motor.C.backward();
-				Motor.A.backward();
 			}
+//			else if (avgSample >= upperBound)
+//			{
+//				//Turn left if on middle of tape
+//				motorsSpeed(SPEED - correction, SPEED + correction);
+//				Motor.A.backward();
+//				Motor.C.backward();
+//			}
 			else
 			{
 				motorsSpeed(SPEED - correction, SPEED + correction);
 				motorsForward();
 			}
 		}
-		
 		motorsStop();
 	}
 }

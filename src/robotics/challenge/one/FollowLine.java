@@ -18,7 +18,7 @@ public class FollowLine implements Behavior{
 	EV3ColorSensor color;
 	
 	final double THRESHOLD = 0.15;
-	final int SPEED = 250;
+	final int SPEED = 150;
 	
 	public FollowLine(EV3ColorSensor color, EV3GyroSensor gyro)
 	{
@@ -85,42 +85,67 @@ public class FollowLine implements Behavior{
 		Motor.C.setSpeed(speedC);
 	}
 	
+	public void turnLeft()
+	{
+		motorsSpeed(SPEED,SPEED);
+		Motor.A.backward();
+		Motor.C.forward();
+		try {
+			Thread.sleep (500);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		motorsStop();
+	}
+	
+	public void turnRight()
+	{
+		motorsSpeed(SPEED,SPEED);
+		Motor.C.backward();
+		Motor.A.forward();
+		try {
+			Thread.sleep (500);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		motorsStop();
+	}
+	
 	@Override
 	public void action() 
 	{
 		unsuppress();
+		
+//		turnLeft();
 
 		//Color values
 		double white = 0.3;		//change
 		double black = 0.05;	//change
 		double avgThreshold = avgThreshold(white, black);
+		double lastSample = readColorRedMode();
 		
 		//PID-controller values
-		double Kp = 1000; //1000; 		//change
-		double Ki = 0;			//change
-		double Kd = 0;			//change
+		double Kp = 1000; 		//change
+		double Kd = 0;
 		
 		//PID-controller variables
 		double lastError = 0;
-		double intergral = 0;
-		
-		//############
-		
-		//############
 		
 		while (!suppressed) {
-			float sampleColor = readColorRedMode();
-//			System.out.println(readGyroAngle());
+			float newSample = readColorRedMode();
+			float avgSample = (float) ((newSample + lastSample) / 2);
+			lastSample = newSample;
 			
 			//PID-controller calculations
-			double newError = avgThreshold - sampleColor;
-			intergral = newError + intergral;
+			double newError = avgThreshold - avgSample;
 			double derivative = newError - lastError;
-			int correction = (int) (Kp * newError + Ki * intergral + Kd * derivative);
 			lastError = newError;
 			
 			//Normal PID-controller behavior
-			
+			int correction = (int) (Kp * newError + Kd * derivative);
+
 			
 //			//Turn faster if outside Bounds
 			double lowerBound = 0.10; //0.35 * avgThreshold;
@@ -129,30 +154,26 @@ public class FollowLine implements Behavior{
 //			motorsSpeed(SPEED + correction, SPEED - correction);
 //			motorsForward();
 			
-			if (sampleColor < lowerBound)
+			if (avgSample < lowerBound)
 			{
+				//Turn right if on black
 				motorsSpeed(SPEED + correction, SPEED - correction);
-				//Turn left if on middle of tape
 				Motor.C.backward();
-				Motor.A.forward();
-			}
-			else if (sampleColor >= upperBound)
-			{
-				motorsSpeed(SPEED - correction, SPEED + correction);
-				//Turn right if on left side of tape
 				Motor.A.backward();
-				Motor.C.forward();
 			}
+//			else if (avgSample >= upperBound)
+//			{
+//				//Turn left if on middle of tape
+//				motorsSpeed(SPEED - correction, SPEED + correction);
+//				Motor.A.backward();
+//				Motor.C.backward();
+//			}
 			else
 			{
 				motorsSpeed(SPEED + correction, SPEED - correction);
 				motorsForward();
 			}
-				
-			
-//			Thread.yield();
 		}
-		
 		motorsStop();
 	}
 }

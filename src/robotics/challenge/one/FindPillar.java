@@ -47,9 +47,9 @@ public class FindPillar implements Behavior{
 	@Override
 	public boolean takeControl() 
 	{
-//		return true;
-		float sampleGyro = readGyroAngle();
-		return Math.abs(sampleGyro) >= 450 ;
+		return true;
+//		float sampleGyro = readGyroAngle();
+//		return Math.abs(sampleGyro) >= 450 ;
 	}
 	
 	@Override
