@@ -9,6 +9,7 @@ import lejos.hardware.sensor.EV3GyroSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.robotics.SampleProvider;
 import lejos.robotics.subsumption.Behavior;
+import lejos.utility.Stopwatch;
 
 /**
  * Behavior that finds a pillar.
@@ -19,6 +20,9 @@ public class FindPillar implements Behavior{
 	boolean suppressed;
 	boolean inRange = false;
 	
+	String previousturn = "right";
+	int time = 100;
+	
 //	EV3GyroSensor gyro;
 //	EV3UltrasonicSensor sonic;
 //	EV3ColorSensor color;
@@ -27,7 +31,7 @@ public class FindPillar implements Behavior{
 	SampleProvider sonic;
 	SampleProvider colorID;
 	
-	final double THRESHOLD = 0.08;
+	final double THRESHOLD = 0.01;
 	final int SPEED = 25;
 	final int RED = 5;
 	final int BLUE = 2;
@@ -142,8 +146,13 @@ public class FindPillar implements Behavior{
 		
 		float oldSample = readUltraSonic();
 		
+		outerloop:
 		while (!suppressed) {
 //			playSound();
+			
+//			motorsSpeed(SPEED, (int) 0.5 * SPEED);
+//			Motor.A.backward();
+//			Motor.C.backward();
 			
 			float newSample = readUltraSonic();
 			float sampleUltraSonic = (oldSample + newSample) / 2;
@@ -162,18 +171,60 @@ public class FindPillar implements Behavior{
 				 */
 				if (sampleUltraSonic > 0.5)
 				{
-					motorsSpeed(SPEED, (int) 0.5 * SPEED);
-					Motor.A.backward();
-					Motor.C.backward();
+					if (previousturn.equals("left"))
+					{
+						Stopwatch sw = new Stopwatch();
+						while(sw.elapsed() < time)
+						{
+							if(readUltraSonic() < 0.5)
+							{
+								playSound();
+								time = 100;
+								break;
+							}
+								
+							motorsSpeed(SPEED,SPEED);
+							Motor.C.backward();
+							Motor.A.forward();
+						}
+						sw.reset();
+						motorsStop();
+						time = time + time;
+						previousturn = "right";
+					}
+					if (previousturn.equals("right"))
+					{
+						Stopwatch sw = new Stopwatch();
+						while(sw.elapsed() < time)
+						{
+							if(readUltraSonic() < 0.5)
+							{
+								playSound();
+								time = 100;
+								break;
+							}
+							motorsSpeed(SPEED,SPEED);
+							Motor.A.backward();
+							Motor.C.forward();
+						}
+						sw.reset();
+						motorsStop();
+						time = time + time;
+						previousturn = "left";
+					}
+//					motorsSpeed(SPEED, (int) 0.5 * SPEED);
+//					Motor.A.backward();
+//					Motor.C.backward();
 				}
-				else if (oldSample < newSample)
-				{
-					motorsSpeed((int) (2*SPEED), (int) (1.5*SPEED));
-					motorsForward();
-				}
+//				else if (oldSample < newSample)
+//				{
+//					motorsSpeed((int) (2*SPEED), (int) (1.5*SPEED));
+//					motorsForward();
+//				}
 				else 
 				{
-					motorsSpeed((int) (1.5*SPEED), 2*SPEED);
+					time = 100;
+					motorsSpeed((int) (2*SPEED), 2*SPEED);
 					motorsForward();
 				}
 			}

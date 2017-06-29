@@ -11,44 +11,37 @@ import lejos.robotics.SampleProvider;
 import lejos.robotics.subsumption.Behavior;
 
 /**
- * Behavior that does an action when close to a blue pillar.
+ * Behavior that finds a pillar.
  * @author johan
  *
  */
-public class BluePillar implements Behavior{
+public class ApproachPillar implements Behavior{
 	boolean suppressed;
 	boolean inRange = false;
-	boolean pillarFound = false;
+	boolean pickedup = false;
 	
+	EV3GyroSensor gyro;
 	EV3UltrasonicSensor sonic;
 	EV3ColorSensor color;
 	
-	
-	
-	final double THRESHOLD = 0.20;
-	final int SPEED = 200;
+	final double THRESHOLD = 0.04;
+	final int SPEED = 100;
 	final int RED = 0;
 	final int BLUE = 2;
-	double white = 0.3;		//change
-	double black = 0.05;	//change
 	
-	public BluePillar(EV3ColorSensor color, EV3UltrasonicSensor sonic) 
+	public ApproachPillar(EV3GyroSensor gyro, EV3ColorSensor color, EV3UltrasonicSensor sonic) 
 	{
 		suppressed = false;
 		this.sonic = sonic;
 		this.color = color;
+		this.gyro = gyro;
 	}
 	
 	@Override
-	/**
-	 * Take control if pillar very close and color is blue
-	 */
 	public boolean takeControl() 
 	{
-		if(pillarFound)
-			return true;
-		inRange = readUltraSonic() < THRESHOLD;
-		return inRange && readColorIDMode() == BLUE;
+		float sample = readUltraSonic();
+		return sample < THRESHOLD && !pickedup;
 	}
 	
 	@Override
@@ -61,6 +54,14 @@ public class BluePillar implements Behavior{
 	{
 		suppressed = false;
 	}
+	
+	public float readGyroAngle()
+	{
+		float[] sample = new float[1];
+		SampleProvider sampleprovider = gyro.getAngleMode();
+		sampleprovider.fetchSample(sample, 0);
+		return sample[0];
+	} 
 	
 	public float readUltraSonic()
 	{
@@ -78,19 +79,6 @@ public class BluePillar implements Behavior{
 		return sample[0];
 	}
 	
-	public double avgThreshold(double white, double black)
-	{
-		return ((white - black) / 2) + black;
-	}
-	
-	public float readColorRedMode()
-	{
-		float[] sample = new float[1];
-		SampleProvider sampleProvider = color.getRedMode();
-		sampleProvider.fetchSample(sample, 0);
-		return sample[0];
-	}
-	
 	public void playSound()
 	{
 		EV3 ev3 = (EV3) BrickFinder.getDefault();
@@ -99,6 +87,19 @@ public class BluePillar implements Behavior{
 //		File file = new File("sound.wav");
 //		System.out.println(file.exists());
 //		System.out.println(Sound.playSample(file, 100));
+	}
+	
+	public void inRange()
+	{
+		inRange = true;
+		suppress();
+		playSound();
+		
+		float sampleColor = readColorIDMode();
+		if (sampleColor == RED)
+			System.out.println("RED");
+		if (sampleColor == BLUE)
+			System.out.println("BLUE");
 	}
 	
 	public void motorsStop()
@@ -121,12 +122,22 @@ public class BluePillar implements Behavior{
 	
 	@Override
 	public void action() {
-		//Start maze
-		pillarFound = true;
-		
 		unsuppress();
 		motorsStop();
+		
+		while (!suppressed) {
+			Motor.B.setSpeed(SPEED);
+			Motor.B.forward();
+			try {
+				Thread.sleep (8000);
+				suppress();
+				pickedup = true;
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		playSound();
-		playSound();
+		Motor.B.stop();
 	}
 }

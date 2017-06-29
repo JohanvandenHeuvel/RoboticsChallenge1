@@ -39,14 +39,14 @@ public class Challenge1 {
 		Behavior FindPillar = new FindPillar(gyro, color, sonic);
 		Behavior BluePillar = new BluePillar(color, sonic);
 		Behavior RedPillar = new RedPillar(color, sonic);
-		Behavior Maze = new Maze(color, gyro);
+		Behavior ApproachPillar = new ApproachPillar(gyro, color, sonic);
 		System.out.println("Behaviors loaded..");
 		 
 		
 		//Arbitrator
 //		Behavior [] bArray = {FindLine, FollowLine, FollowLineInside, FindPillar, BluePillar, RedPillar};
 //		Behavior [] bArray = {FindLine , FollowLine, FollowLineInside, FindPillar, BluePillar, RedPillar};
-		Behavior [] bArray = {FollowLineInside};
+		Behavior [] bArray = {FollowLine};
 		
 		Arbitrator arbitrator = new Arbitrator(bArray);
 		arbitrator.start();

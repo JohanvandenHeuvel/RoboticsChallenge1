@@ -115,7 +115,7 @@ public class FollowLineInside implements Behavior {
 	{
 		unsuppress();
 		
-//		turnRight();
+		turnRight();
 		System.out.println("Continue..");
 
 		//Color values
@@ -147,7 +147,7 @@ public class FollowLineInside implements Behavior {
 			
 //			//Turn faster if outside Bounds
 			double lowerBound = 0.10; //0.35 * avgThreshold;
-			double upperBound = 0.20; //1.35 * avgThreshold;
+			double upperBound = 0.25; //1.35 * avgThreshold;
 			
 //			motorsSpeed(SPEED + correction, SPEED - correction);
 //			motorsForward();
