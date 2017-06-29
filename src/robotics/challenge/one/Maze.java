@@ -11,16 +11,16 @@ import lejos.robotics.subsumption.Behavior;
  * @author johan
  *
  */
-public class FollowLine implements Behavior{
+public class Maze implements Behavior{
 	boolean suppressed;
 	
 	EV3GyroSensor gyro;
 	EV3ColorSensor color;
 	
 	final double THRESHOLD = 0.15;
-	final int SPEED = 250;
+	final int SPEED = 300;
 	
-	public FollowLine(EV3ColorSensor color, EV3GyroSensor gyro)
+	public Maze(EV3ColorSensor color, EV3GyroSensor gyro)
 	{
 		suppressed = false;
 		this.color = color;
@@ -30,9 +30,8 @@ public class FollowLine implements Behavior{
 	@Override
 	public boolean takeControl() 
 	{
-		return true;
-//		float sampleColor = readColorRedMode();
-//		return sampleColor > THRESHOLD;
+		float sampleColor = readColorRedMode();
+		return sampleColor > THRESHOLD;
 	}
 	
 	@Override
@@ -110,7 +109,7 @@ public class FollowLine implements Behavior{
 		
 		while (!suppressed) {
 			float sampleColor = readColorRedMode();
-//			System.out.println(readGyroAngle());
+			System.out.println(readGyroAngle());
 			
 			//PID-controller calculations
 			double newError = avgThreshold - sampleColor;
@@ -123,31 +122,31 @@ public class FollowLine implements Behavior{
 			
 			
 //			//Turn faster if outside Bounds
-			double lowerBound = 0.10; //0.35 * avgThreshold;
-			double upperBound = 0.25; //1.35 * avgThreshold;
+			double lowerBound = 0.25 * avgThreshold;
+			double upperBound = 1.45 * avgThreshold;
 			
-//			motorsSpeed(SPEED + correction, SPEED - correction);
-//			motorsForward();
+			motorsSpeed(SPEED - correction, SPEED + correction);
+			motorsForward();
 			
-			if (sampleColor < lowerBound)
-			{
-				motorsSpeed(SPEED + correction, SPEED - correction);
-				//Turn left if on middle of tape
-				Motor.C.backward();
-				Motor.A.forward();
-			}
-			else if (sampleColor >= upperBound)
-			{
-				motorsSpeed(SPEED - correction, SPEED + correction);
-				//Turn right if on left side of tape
-				Motor.A.backward();
-				Motor.C.forward();
-			}
-			else
-			{
-				motorsSpeed(SPEED + correction, SPEED - correction);
-				motorsForward();
-			}
+//			if (sampleColor < lowerBound)
+//			{
+////				motorsSpeed(SPEED - correction, SPEED - correction);
+//				//Turn left if on middle of tape
+//				Motor.C.backward();
+//				Motor.A.forward();
+//			}
+//			else if (sampleColor >= upperBound)
+//			{
+////				motorsSpeed(SPEED + correction, SPEED - correction);
+//				//Turn right if on left side of tape
+//				Motor.A.backward();
+//				Motor.C.forward();
+//			}
+//			else
+//			{
+////				motorsSpeed(SPEED - correction, SPEED + correction);
+//				motorsForward();
+//			}
 				
 			
 //			Thread.yield();

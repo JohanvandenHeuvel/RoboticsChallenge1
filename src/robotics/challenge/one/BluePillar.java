@@ -18,14 +18,19 @@ import lejos.robotics.subsumption.Behavior;
 public class BluePillar implements Behavior{
 	boolean suppressed;
 	boolean inRange = false;
+	boolean pillarFound = false;
 	
 	EV3UltrasonicSensor sonic;
 	EV3ColorSensor color;
 	
-	final double THRESHOLD = 0.15;
+	
+	
+	final double THRESHOLD = 0.20;
 	final int SPEED = 200;
 	final int RED = 0;
 	final int BLUE = 2;
+	double white = 0.3;		//change
+	double black = 0.05;	//change
 	
 	public BluePillar(EV3ColorSensor color, EV3UltrasonicSensor sonic) 
 	{
@@ -40,6 +45,8 @@ public class BluePillar implements Behavior{
 	 */
 	public boolean takeControl() 
 	{
+		if(pillarFound)
+			return true;
 		inRange = readUltraSonic() < THRESHOLD;
 		return inRange && readColorIDMode() == BLUE;
 	}
@@ -67,6 +74,19 @@ public class BluePillar implements Behavior{
 	{
 		float[] sample = new float[1];
 		SampleProvider sampleProvider = color.getColorIDMode();
+		sampleProvider.fetchSample(sample, 0);
+		return sample[0];
+	}
+	
+	public double avgThreshold(double white, double black)
+	{
+		return ((white - black) / 2) + black;
+	}
+	
+	public float readColorRedMode()
+	{
+		float[] sample = new float[1];
+		SampleProvider sampleProvider = color.getRedMode();
 		sampleProvider.fetchSample(sample, 0);
 		return sample[0];
 	}
@@ -101,9 +121,70 @@ public class BluePillar implements Behavior{
 	
 	@Override
 	public void action() {
+		//Start maze
+		pillarFound = true;
+		
 		unsuppress();
 		motorsStop();
 		playSound();
-		System.out.println("BLUE");
+		playSound();
+
+		//Color values
+		double avgThreshold = avgThreshold(white, black);
+		
+		//PID-controller values
+		double Kp = 1000; 		//change
+		double Ki = 0;			//change
+		double Kd = 0;			//change
+		
+		//PID-controller variables
+		double lastError = 0;
+		double intergral = 0;
+		float lastSample = readColorRedMode();
+		
+		while (!suppressed) {
+			float sample = readColorRedMode();
+			float sampleColor = (float) (0.5 * lastSample + 0.5 * sample);
+			lastSample = sampleColor;
+			
+			//PID-controller calculations
+			double newError = avgThreshold - sampleColor;
+			intergral = newError + intergral;
+			double derivative = newError - lastError;
+			int correction = (int) (Kp * newError + Ki * intergral + Kd * derivative);
+			lastError = newError;
+			
+			//Normal PID-controller behavior
+			
+			
+//			//Turn faster if outside Bounds
+			double lowerBound = 0.10; //0.35 * avgThreshold;
+			double upperBound = 0.25; //1.35 * avgThreshold;
+			
+			
+			motorsForward();
+			
+			if (sampleColor < lowerBound)
+			{
+				//Turn left if on middle of tape
+				motorsSpeed(SPEED - correction, SPEED + correction);
+				Motor.A.backward();
+				Motor.C.forward();
+			}
+			else if (sampleColor >= upperBound)
+			{
+				//Turn right if on left side of tape
+				motorsSpeed(SPEED + correction, SPEED - correction);
+				Motor.C.backward();
+				Motor.A.backward();
+			}
+			else
+			{
+				motorsSpeed(SPEED - correction, SPEED + correction);
+				motorsForward();
+			}
+		}
+		
+		motorsStop();
 	}
 }

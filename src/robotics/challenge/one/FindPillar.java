@@ -19,28 +19,37 @@ public class FindPillar implements Behavior{
 	boolean suppressed;
 	boolean inRange = false;
 	
-	EV3GyroSensor gyro;
-	EV3UltrasonicSensor sonic;
-	EV3ColorSensor color;
+//	EV3GyroSensor gyro;
+//	EV3UltrasonicSensor sonic;
+//	EV3ColorSensor color;
+//	
+	SampleProvider gyro;
+	SampleProvider sonic;
+	SampleProvider colorID;
 	
 	final double THRESHOLD = 0.08;
-	final int SPEED = 75;
+	final int SPEED = 50;
 	final int RED = 5;
 	final int BLUE = 2;
 	
 	public FindPillar(EV3GyroSensor gyro, EV3ColorSensor color, EV3UltrasonicSensor sonic) 
 	{
 		suppressed = false;
-		this.sonic = sonic;
-		this.color = color;
-		this.gyro = gyro;
+//		this.sonic = sonic;
+//		this.color = color;
+//		this.gyro = gyro;
+		
+		this.gyro = gyro.getAngleMode();
+		this.sonic = sonic.getDistanceMode();
+		this.colorID = color.getColorIDMode();
 	}
 	
 	@Override
 	public boolean takeControl() 
 	{
+//		return true;
 		float sampleGyro = readGyroAngle();
-		return Math.abs(sampleGyro) > 450 ;
+		return Math.abs(sampleGyro) >= 450 ;
 	}
 	
 	@Override
@@ -57,24 +66,24 @@ public class FindPillar implements Behavior{
 	public float readGyroAngle()
 	{
 		float[] sample = new float[1];
-		SampleProvider sampleprovider = gyro.getAngleMode();
-		sampleprovider.fetchSample(sample, 0);
+//		SampleProvider sampleprovider = gyro.getAngleMode();
+		gyro.fetchSample(sample, 0);
 		return sample[0];
 	} 
 	
 	public float readUltraSonic()
 	{
 		float[] sample = new float[1];
-		SampleProvider sampleProvider = sonic.getDistanceMode();
-		sampleProvider.fetchSample(sample, 0);
+//		SampleProvider sampleProvider = sonic.getDistanceMode();
+		sonic.fetchSample(sample, 0);
 		return sample[0];
 	}
 	
 	public float readColorIDMode()
 	{
 		float[] sample = new float[1];
-		SampleProvider sampleProvider = color.getColorIDMode();
-		sampleProvider.fetchSample(sample, 0);
+//		SampleProvider sampleProvider = color.getColorIDMode();
+		colorID.fetchSample(sample, 0);
 		return sample[0];
 	}
 	
@@ -126,7 +135,7 @@ public class FindPillar implements Behavior{
 		System.out.println("FindPillar");
 		
 //		System.out.println("Playing sound..");
-//		playSound();
+		playSound();
 //		System.out.println("Done");
 		
 		while (!suppressed) {
@@ -134,7 +143,7 @@ public class FindPillar implements Behavior{
 			
 			float sampleUltraSonic = readUltraSonic();
 			
-			System.out.println(readColorIDMode());
+			System.out.println(sampleUltraSonic);
 			
 			if(sampleUltraSonic < THRESHOLD)
 			{
@@ -146,11 +155,11 @@ public class FindPillar implements Behavior{
 				 * Turn if no object in range
 				 * Forward if object in range
 				 */
-				if (sampleUltraSonic > 1)
+				if (sampleUltraSonic > 1.5)
 				{
-					motorsSpeed(SPEED, SPEED);
+					motorsSpeed(SPEED, (int) 0.5 * SPEED);
 					Motor.A.backward();
-					Motor.C.forward();
+					Motor.C.backward();
 				}
 				else 
 				{

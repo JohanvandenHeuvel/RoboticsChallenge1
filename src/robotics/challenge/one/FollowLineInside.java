@@ -21,7 +21,9 @@ public class FollowLineInside implements Behavior {
 	EV3GyroSensor gyro;
 	EV3ColorSensor color;
 	
-	final int SPEED = 300;
+	final int SPEED = 250;
+	double white = 0.3;		//change
+	double black = 0.05;	//change
 	
 	public FollowLineInside(EV3ColorSensor color, EV3GyroSensor gyro)
 	{
@@ -32,6 +34,7 @@ public class FollowLineInside implements Behavior {
 	@Override
 	public boolean takeControl() 
 	{
+//		return true;
 		float sampleGyro = readGyroAngle();
 		return Math.abs(sampleGyro) >= 270 ;
 	}
@@ -88,6 +91,19 @@ public class FollowLineInside implements Behavior {
 		Motor.C.setSpeed(speedC);
 	}
 	
+	public void turnInside()
+	{
+		motorsSpeed((int) 0.5* SPEED,(int) 0.5 * SPEED);
+		Motor.C.backward();
+		Motor.A.forward();
+		try {
+			Thread.sleep (1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	public double avgThreshold(double white, double black)
 	{
 		return ((white - black) / 2) + black;
@@ -97,25 +113,27 @@ public class FollowLineInside implements Behavior {
 	public void action() 
 	{
 		unsuppress();
-		
+		playSound();
+		turnInside();
 		playSound();
 
 		//Color values
-		double white = 0.3;		//change
-		double black = 0.05;		//change
 		double avgThreshold = avgThreshold(white, black);
 		
 		//PID-controller values
 		double Kp = 1000; 		//change
 		double Ki = 0;			//change
-		double Kd = 0;		//change
+		double Kd = 0;			//change
 		
 		//PID-controller variables
 		double lastError = 0;
 		double intergral = 0;
+		float lastSample = readColorRedMode();
 		
 		while (!suppressed) {
-			float sampleColor = readColorRedMode();
+			float sample = readColorRedMode();
+			float sampleColor = (float) (0.5 * lastSample + 0.5 * sample);
+			lastSample = sampleColor;
 			
 			//PID-controller calculations
 			double newError = avgThreshold - sampleColor;
@@ -125,11 +143,11 @@ public class FollowLineInside implements Behavior {
 			lastError = newError;
 			
 			//Normal PID-controller behavior
-			motorsSpeed(SPEED + correction, SPEED - correction);
+			
 			
 //			//Turn faster if outside Bounds
-			double lowerBound = 0.3 * avgThreshold;
-			double upperBound = 1.4 * avgThreshold;
+			double lowerBound = 0.10; //0.35 * avgThreshold;
+			double upperBound = 0.25; //1.35 * avgThreshold;
 //			
 			
 			motorsForward();
@@ -137,17 +155,20 @@ public class FollowLineInside implements Behavior {
 			if (sampleColor < lowerBound)
 			{
 				//Turn left if on middle of tape
-				Motor.C.backward();
-				Motor.A.forward();
+				motorsSpeed(SPEED - correction, SPEED + correction);
+				Motor.A.backward();
+				Motor.C.forward();
 			}
 			else if (sampleColor >= upperBound)
 			{
 				//Turn right if on left side of tape
+				motorsSpeed(SPEED + correction, SPEED - correction);
+				Motor.C.backward();
 				Motor.A.backward();
-				Motor.C.forward();
 			}
 			else
 			{
+				motorsSpeed(SPEED - correction, SPEED + correction);
 				motorsForward();
 			}
 		}

@@ -2,6 +2,7 @@ package robotics.challenge.one;
 
 import lejos.hardware.Audio;
 import lejos.hardware.BrickFinder;
+import lejos.hardware.Sound;
 import lejos.hardware.ev3.EV3;
 import lejos.hardware.motor.Motor;
 import lejos.hardware.sensor.EV3ColorSensor;
@@ -75,7 +76,8 @@ public class RedPillar implements Behavior{
 	{
 		EV3 ev3 = (EV3) BrickFinder.getDefault();
 		Audio audio = ev3.getAudio();
-		audio.systemSound(0);
+		Sound.beepSequenceUp();
+//		audio.systemSound(0);
 //		File file = new File("sound.wav");
 //		System.out.println(file.exists());
 //		System.out.println(Sound.playSample(file, 100));
