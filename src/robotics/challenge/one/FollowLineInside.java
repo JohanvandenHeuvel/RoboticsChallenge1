@@ -115,7 +115,7 @@ public class FollowLineInside implements Behavior {
 	{
 		unsuppress();
 		
-		turnRight();
+//		turnRight();
 		System.out.println("Continue..");
 
 		//Color values
@@ -155,7 +155,7 @@ public class FollowLineInside implements Behavior {
 			if (avgSample >= upperBound)
 			{
 				//Turn right if on middle of tape
-				motorsSpeed(SPEED, SPEED);
+				motorsSpeed(SPEED + correction, SPEED - correction);
 				Motor.A.stop();
 				Motor.C.backward();
 			}

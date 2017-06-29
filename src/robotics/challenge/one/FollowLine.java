@@ -159,7 +159,7 @@ public class FollowLine implements Behavior{
 				//Turn right if on black
 				motorsSpeed(SPEED + correction, SPEED - correction);
 				Motor.C.backward();
-				Motor.A.backward();
+				Motor.A.forward();
 			}
 //			else if (avgSample >= upperBound)
 //			{

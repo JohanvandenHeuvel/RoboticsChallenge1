@@ -28,9 +28,11 @@ public class FindPillar implements Behavior{
 	SampleProvider colorID;
 	
 	final double THRESHOLD = 0.08;
-	final int SPEED = 50;
+	final int SPEED = 25;
 	final int RED = 5;
 	final int BLUE = 2;
+	
+	
 	
 	public FindPillar(EV3GyroSensor gyro, EV3ColorSensor color, EV3UltrasonicSensor sonic) 
 	{
@@ -127,7 +129,7 @@ public class FindPillar implements Behavior{
 		Motor.A.setSpeed(speedA);
 		Motor.C.setSpeed(speedC);
 	}
-	
+
 	@Override
 	public void action() {
 		unsuppress();
@@ -138,10 +140,13 @@ public class FindPillar implements Behavior{
 		playSound();
 //		System.out.println("Done");
 		
+		float oldSample = readUltraSonic();
+		
 		while (!suppressed) {
 //			playSound();
 			
-			float sampleUltraSonic = readUltraSonic();
+			float newSample = readUltraSonic();
+			float sampleUltraSonic = (oldSample + newSample) / 2;
 			
 			System.out.println(sampleUltraSonic);
 			
@@ -155,20 +160,24 @@ public class FindPillar implements Behavior{
 				 * Turn if no object in range
 				 * Forward if object in range
 				 */
-				if (sampleUltraSonic > 1.5)
+				if (sampleUltraSonic > 0.5)
 				{
 					motorsSpeed(SPEED, (int) 0.5 * SPEED);
 					Motor.A.backward();
 					Motor.C.backward();
 				}
-				else 
+				else if (oldSample < newSample)
 				{
-					motorsSpeed(2*SPEED, 2*SPEED);
+					motorsSpeed((int) (2*SPEED), (int) (1.5*SPEED));
 					motorsForward();
 				}
-				
-//				Thread.yield();
+				else 
+				{
+					motorsSpeed((int) (1.5*SPEED), 2*SPEED);
+					motorsForward();
+				}
 			}
+			oldSample = newSample;
 		}
 		motorsStop();
 	}

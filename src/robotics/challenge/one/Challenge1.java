@@ -46,7 +46,7 @@ public class Challenge1 {
 		//Arbitrator
 //		Behavior [] bArray = {FindLine, FollowLine, FollowLineInside, FindPillar, BluePillar, RedPillar};
 //		Behavior [] bArray = {FindLine , FollowLine, FollowLineInside, FindPillar, BluePillar, RedPillar};
-		Behavior [] bArray = {FindPillar};
+		Behavior [] bArray = {FollowLineInside};
 		
 		Arbitrator arbitrator = new Arbitrator(bArray);
 		arbitrator.start();
