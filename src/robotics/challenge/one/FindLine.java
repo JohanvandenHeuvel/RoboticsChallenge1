@@ -1,8 +1,6 @@
 package robotics.challenge.one;
 
 import lejos.hardware.motor.Motor;
-import lejos.hardware.port.Port;
-import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.robotics.subsumption.Behavior;
 
 /**
@@ -64,7 +62,6 @@ public class FindLine implements Behavior {
 		while(!suppressed)
 		{
 			motorsForward();
-//			Thread.yield();
 		}
 			
 		motorsStop();

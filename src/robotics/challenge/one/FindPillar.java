@@ -98,9 +98,6 @@ public class FindPillar implements Behavior{
 		EV3 ev3 = (EV3) BrickFinder.getDefault();
 		Audio audio = ev3.getAudio();
 		audio.systemSound(0);
-//		File file = new File("sound.wav");
-//		System.out.println(file.exists());
-//		System.out.println(Sound.playSample(file, 100));
 	}
 	
 	public void inRange()
@@ -140,20 +137,11 @@ public class FindPillar implements Behavior{
 		
 		System.out.println("FindPillar");
 		
-//		System.out.println("Playing sound..");
 		playSound();
-//		System.out.println("Done");
 		
 		float oldSample = readUltraSonic();
 		
-		outerloop:
 		while (!suppressed) {
-//			playSound();
-			
-//			motorsSpeed(SPEED, (int) 0.5 * SPEED);
-//			Motor.A.backward();
-//			Motor.C.backward();
-			
 			float newSample = readUltraSonic();
 			float sampleUltraSonic = (oldSample + newSample) / 2;
 			

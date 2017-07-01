@@ -10,9 +10,10 @@ import lejos.hardware.sensor.EV3GyroSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.robotics.SampleProvider;
 import lejos.robotics.subsumption.Behavior;
+import lejos.utility.Delay;
 
 /**
- * Behavior that does an action when close to a blue pillar.
+ * Behavior that does an action when close to a red pillar.
  * @author johan
  *
  */
@@ -37,7 +38,7 @@ public class RedPillar implements Behavior{
 	
 	@Override
 	/**
-	 * Take control if pillar very close and color is blue
+	 * Take control if pillar very close and color is red
 	 */
 	public boolean takeControl() 
 	{
@@ -104,8 +105,33 @@ public class RedPillar implements Behavior{
 	@Override
 	public void action() {
 		unsuppress();
+		
+		Motor.C.backward();
+		Motor.A.forward();
+		Delay.msDelay(1000);
 		motorsStop();
-		playSound();
-		System.out.println("RED");
+		
+		Motor.C.forward();
+		Motor.A.backward();
+		Delay.msDelay(1000);
+		motorsStop();
+		
+		Motor.C.backward();
+		Motor.A.forward();
+		Delay.msDelay(1000);
+		motorsStop();
+		
+		Motor.C.forward();
+		Motor.A.backward();
+		Delay.msDelay(1000);
+		motorsStop();
+		
+		EV3 ev3 = (EV3) BrickFinder.getDefault();
+		Audio audio = ev3.getAudio();
+		
+		audio.playTone(630, 1000, 80);
+		audio.playTone(841, 1000, 80);
+		audio.playTone(794, 1000, 80);
+		audio.playTone(841, 1000, 80);
 	}
 }

@@ -5,6 +5,7 @@ import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3GyroSensor;
 import lejos.robotics.SampleProvider;
 import lejos.robotics.subsumption.Behavior;
+import lejos.utility.Delay;
 
 /**
  * Behavior that follows a line.
@@ -19,6 +20,8 @@ public class FollowLine implements Behavior{
 	
 	final double THRESHOLD = 0.15;
 	final int SPEED = 150;
+	final double WHITE = 0.3;		
+	final double BLACK = 0.05;	
 	
 	public FollowLine(EV3ColorSensor color, EV3GyroSensor gyro)
 	{
@@ -30,9 +33,9 @@ public class FollowLine implements Behavior{
 	@Override
 	public boolean takeControl() 
 	{
-		return true;
-//		float sampleColor = readColorRedMode();
-//		return sampleColor > THRESHOLD;
+//		return true;
+		float sampleColor = readColorRedMode();
+		return sampleColor > THRESHOLD;
 	}
 	
 	@Override
@@ -90,12 +93,7 @@ public class FollowLine implements Behavior{
 		motorsSpeed(SPEED,SPEED);
 		Motor.A.backward();
 		Motor.C.forward();
-		try {
-			Thread.sleep (500);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		Delay.msDelay(500);
 		motorsStop();
 	}
 	
@@ -104,12 +102,7 @@ public class FollowLine implements Behavior{
 		motorsSpeed(SPEED,SPEED);
 		Motor.C.backward();
 		Motor.A.forward();
-		try {
-			Thread.sleep (500);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		Delay.msDelay(500);
 		motorsStop();
 	}
 	
@@ -118,20 +111,14 @@ public class FollowLine implements Behavior{
 	{
 		unsuppress();
 		
-//		turnLeft();
+		turnLeft();
 
 		//Color values
-		double white = 0.3;		//change
-		double black = 0.05;	//change
-		double avgThreshold = avgThreshold(white, black);
+		double avgThreshold = avgThreshold(WHITE, BLACK);
 		double lastSample = readColorRedMode();
 		
 		//PID-controller values
 		double Kp = 1000; 		//change
-		double Kd = 0;
-		
-		//PID-controller variables
-		double lastError = 0;
 		
 		while (!suppressed) {
 			float newSample = readColorRedMode();
@@ -140,11 +127,9 @@ public class FollowLine implements Behavior{
 			
 			//PID-controller calculations
 			double newError = avgThreshold - avgSample;
-			double derivative = newError - lastError;
-			lastError = newError;
 			
 			//Normal PID-controller behavior
-			int correction = (int) (Kp * newError + Kd * derivative);
+			int correction = (int) (Kp * newError);
 
 			
 //			//Turn faster if outside Bounds

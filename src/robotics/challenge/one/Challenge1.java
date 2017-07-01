@@ -1,12 +1,9 @@
 package robotics.challenge.one;
 
-import javax.swing.plaf.basic.BasicTableHeaderUI;
-
 import lejos.hardware.port.SensorPort;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3GyroSensor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
-import lejos.robotics.SampleProvider;
 import lejos.robotics.subsumption.Arbitrator;
 import lejos.robotics.subsumption.Behavior;
 
@@ -37,20 +34,17 @@ public class Challenge1 {
 		Behavior FollowLineInside = new FollowLineInside(color, gyro);
 		System.out.println("FollowLineInside loaded..");
 		Behavior FindPillar = new FindPillar(gyro, color, sonic);
+		System.out.println("FindPillar loaded..");
 		Behavior BluePillar = new BluePillar(color, sonic);
+		System.out.println("BluePillar loaded..");
 		Behavior RedPillar = new RedPillar(color, sonic);
-		Behavior ApproachPillar = new ApproachPillar(gyro, color, sonic);
-		Behavior Bridge = new Bridge (color, gyro);
-		Behavior Hostile = new Hostile(color, gyro);
-		Behavior Friendly = new Friendly(color, gyro);
+		System.out.println("RedPillar loaded..");
 		System.out.println("Behaviors loaded..");
 		
 		 
 		
 		//Arbitrator
-//		Behavior [] bArray = {FindLine, FollowLine, FollowLineInside, FindPillar, BluePillar, RedPillar};
-//		Behavior [] bArray = {FindLine , FollowLine, FollowLineInside, FindPillar, BluePillar, RedPillar};
-		Behavior [] bArray = {Friendly};
+		Behavior [] bArray = {FindLine, FollowLine, FollowLineInside, FindPillar, BluePillar, RedPillar};
 		
 		Arbitrator arbitrator = new Arbitrator(bArray);
 		arbitrator.start();
