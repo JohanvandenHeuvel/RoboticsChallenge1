@@ -8,6 +8,7 @@ import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3GyroSensor;
 import lejos.robotics.SampleProvider;
 import lejos.robotics.subsumption.Behavior;
+import lejos.utility.Delay;
 
 /**
  * Behavior that drives inside of the grid to find the center waypoint.
@@ -22,8 +23,8 @@ public class FollowLineInside implements Behavior {
 	EV3ColorSensor color;
 	
 	final int SPEED = 150;
-	double white = 0.3;		//change
-	double black = 0.05;	//change
+	double WHITE = 0.4;		//change
+	double BLACK = 0.05;	//change
 	
 	public FollowLineInside(EV3ColorSensor color, EV3GyroSensor gyro)
 	{
@@ -34,9 +35,9 @@ public class FollowLineInside implements Behavior {
 	@Override
 	public boolean takeControl() 
 	{
-		return true;
-//		float sampleGyro = readGyroAngle();
-//		return Math.abs(sampleGyro) >= 270 ;
+//		return true;
+		float sampleGyro = readGyroAngle();
+		return Math.abs(sampleGyro) >= 270 ;
 	}
 	
 	@Override
@@ -96,14 +97,26 @@ public class FollowLineInside implements Behavior {
 		motorsSpeed(SPEED,SPEED);
 		Motor.C.backward();
 		Motor.A.forward();
-		try {
-			Thread.sleep (1500);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		Delay.msDelay(1500);
 		motorsStop();
 	}
+	
+//	public void turnRight()
+//	{
+//		motorsSpeed(SPEED,SPEED);
+//		Motor.C.backward();
+//		Motor.A.forward();
+//		Delay.msDelay(1000);
+//		motorsStop();
+//		
+//		motorsSpeed(SPEED,SPEED);
+//		Motor.C.forward();
+//		Motor.A.forward();
+//		Delay.msDelay(1000);
+//		motorsStop();
+//		
+//		
+//	}
 	
 	public double avgThreshold(double white, double black)
 	{
@@ -116,20 +129,15 @@ public class FollowLineInside implements Behavior {
 		unsuppress();
 		
 		turnRight();
+		Delay.msDelay(500);
 		System.out.println("Continue..");
 
 		//Color values
-		double white = 0.3;		//change
-		double black = 0.05;	//change
-		double avgThreshold = avgThreshold(white, black);
+		double avgThreshold = avgThreshold(WHITE, BLACK);
 		double lastSample = readColorRedMode();
 		
 		//PID-controller values
 		double Kp = 1000; 		//change
-		double Kd = 0;
-		
-		//PID-controller variables
-		double lastError = 0;
 		
 		while (!suppressed) {
 			float newSample = readColorRedMode();
@@ -138,16 +146,14 @@ public class FollowLineInside implements Behavior {
 			
 			//PID-controller calculations
 			double newError = avgThreshold - avgSample;
-			double derivative = newError - lastError;
-			lastError = newError;
 			
 			//Normal PID-controller behavior
-			int correction = (int) (Kp * newError + Kd * derivative);
+			int correction = (int) (Kp * newError);
 
 			
 //			//Turn faster if outside Bounds
 			double lowerBound = 0.10; //0.35 * avgThreshold;
-			double upperBound = 0.25; //1.35 * avgThreshold;
+			double upperBound = 0.30; //1.35 * avgThreshold;
 			
 //			motorsSpeed(SPEED + correction, SPEED - correction);
 //			motorsForward();

@@ -5,6 +5,7 @@ import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.EV3GyroSensor;
 import lejos.robotics.SampleProvider;
 import lejos.robotics.subsumption.Behavior;
+import lejos.utility.Delay;
 
 /**
  * Behavior that follows a line.
@@ -30,9 +31,9 @@ public class FollowLine implements Behavior{
 	@Override
 	public boolean takeControl() 
 	{
-		return true;
-//		float sampleColor = readColorRedMode();
-//		return sampleColor > THRESHOLD;
+//		return true;
+		float sampleColor = readColorRedMode();
+		return sampleColor > THRESHOLD;
 	}
 	
 	@Override
@@ -88,14 +89,23 @@ public class FollowLine implements Behavior{
 	public void turnLeft()
 	{
 		motorsSpeed(SPEED,SPEED);
-		Motor.A.backward();
+
+		Motor.A.forward();
 		Motor.C.forward();
-		try {
-			Thread.sleep (500);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		Delay.msDelay(500);
+		while(Math.abs(readGyroAngle()) < 90)
+		{
+			Motor.A.backward();
+			Motor.C.forward();
+//			Delay.msDelay(750);
 		}
+		
+//		
+//		Motor.A.backward();
+//		Motor.C.forward();
+//		Delay.msDelay(750);
+		
+
 		motorsStop();
 	}
 	
@@ -104,12 +114,7 @@ public class FollowLine implements Behavior{
 		motorsSpeed(SPEED,SPEED);
 		Motor.C.backward();
 		Motor.A.forward();
-		try {
-			Thread.sleep (500);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		Delay.msDelay(1000);
 		motorsStop();
 	}
 	
@@ -118,10 +123,10 @@ public class FollowLine implements Behavior{
 	{
 		unsuppress();
 		
-//		turnLeft();
+		turnLeft();
 
 		//Color values
-		double white = 0.3;		//change
+		double white = 0.4;		//change
 		double black = 0.05;	//change
 		double avgThreshold = avgThreshold(white, black);
 		double lastSample = readColorRedMode();
@@ -149,7 +154,7 @@ public class FollowLine implements Behavior{
 			
 //			//Turn faster if outside Bounds
 			double lowerBound = 0.10; //0.35 * avgThreshold;
-			double upperBound = 0.25; //1.35 * avgThreshold;
+			double upperBound = 0.30; //1.35 * avgThreshold;
 			
 //			motorsSpeed(SPEED + correction, SPEED - correction);
 //			motorsForward();
@@ -157,7 +162,7 @@ public class FollowLine implements Behavior{
 			if (avgSample < lowerBound)
 			{
 				//Turn right if on black
-				motorsSpeed(SPEED + correction, SPEED - correction);
+				motorsSpeed(SPEED - correction, SPEED + correction);
 				Motor.C.backward();
 				Motor.A.forward();
 			}

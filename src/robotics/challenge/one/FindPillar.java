@@ -53,9 +53,9 @@ public class FindPillar implements Behavior{
 	@Override
 	public boolean takeControl() 
 	{
-		return true;
-//		float sampleGyro = readGyroAngle();
-//		return Math.abs(sampleGyro) >= 450 ;
+//		return true;
+		float sampleGyro = readGyroAngle();
+		return Math.abs(sampleGyro) >= 450 ;
 	}
 	
 	@Override
@@ -169,7 +169,7 @@ public class FindPillar implements Behavior{
 				 * Turn if no object in range
 				 * Forward if object in range
 				 */
-				if (sampleUltraSonic > 0.5)
+				if (sampleUltraSonic > 1)
 				{
 					if (previousturn.equals("left"))
 					{
